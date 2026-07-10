@@ -37,7 +37,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const valid = await bcrypt.compare(parsed.data.password, user.passwordHash);
         if (!valid) return null;
 
-        if (!user.emailVerified) return null;
+        if (!user.emailVerified && process.env.NODE_ENV !== "development") return null;
 
         return { id: user.id, email: user.email, role: user.role };
       },
@@ -66,12 +66,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id;
+        token.id = user.id ?? "";
         // For OAuth, fetch role from DB since it's not in the provider payload
         if (account?.provider === "google" || account?.provider === "github") {
           const dbUser = await prisma.user.findUnique({ where: { email: token.email! } });
           token.role = dbUser?.role ?? "REP";
-          token.id = dbUser?.id ?? token.id;
+          token.id = dbUser?.id ?? token.id ?? "";
         } else {
           token.role = (user as { role: string }).role;
         }

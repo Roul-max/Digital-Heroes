@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: "Sign In",
   description:
     "Sign in to LeadRouter, create your account, or reset your password to manage lead routing for your sales team.",
+  robots: { index: false, follow: false },
   openGraph: {
     title: "LeadRouter — Sign In",
     description: "Sign in to manage lead routing for your sales team.",
@@ -13,13 +14,13 @@ export const metadata: Metadata = {
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
-      <div className="w-full max-w-md">
+      <main className="w-full max-w-md" id="main-content">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold text-neutral-900">LeadRouter</h1>
           <p className="text-sm text-neutral-500 mt-1">Intelligent lead routing for sales teams</p>
         </div>
         {children}
-      </div>
+      </main>
     </div>
   );
 }

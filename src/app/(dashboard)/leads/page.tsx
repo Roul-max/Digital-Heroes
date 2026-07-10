@@ -62,7 +62,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Search
         <select
           name="status"
           defaultValue={params.status ?? ""}
-          className="px-3 py-2 rounded-md border border-neutral-300 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          className="px-3 py-2 rounded-md border border-neutral-300 bg-white text-neutral-900 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         >
           <option value="">All statuses</option>
           {["NEW", "CONTACTED", "QUALIFIED", "WON", "LOST"].map((s) => (
@@ -79,7 +79,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Search
         />
         <button
           type="submit"
-          className="px-4 py-2 bg-neutral-900 text-white text-sm rounded-lg hover:bg-neutral-700 transition-colors duration-150"
+          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           Filter
         </button>

@@ -24,14 +24,14 @@ export function Sidebar({ role }: { role: string }) {
   return (
     <>
       <CommandPalette />
-      <aside className="w-64 min-h-screen bg-white border-r border-neutral-200 flex flex-col">
-        <div className="px-6 py-5 border-b border-neutral-200">
+      <aside className="w-16 sm:w-64 min-h-screen bg-white border-r border-neutral-200 flex flex-col shrink-0">
+        <div className="px-6 py-5 border-b border-neutral-200 hidden sm:block">
           <span className="text-xl font-semibold tracking-tight text-neutral-900">LeadRouter</span>
         </div>
         {/* Cmd+K trigger */}
         <button
           onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }))}
-          className="mx-3 mt-3 flex items-center gap-2 px-3 py-2 rounded-lg border border-neutral-200 text-sm text-neutral-400 hover:border-neutral-300 hover:text-neutral-600 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          className="mx-3 mt-3 hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg border border-neutral-200 text-sm text-neutral-400 hover:border-neutral-300 hover:text-neutral-600 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           aria-label="Open command palette"
         >
           <Search className="w-3.5 h-3.5" aria-hidden="true" />
@@ -45,7 +45,7 @@ export function Sidebar({ role }: { role: string }) {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150",
+                "flex items-center justify-center sm:justify-start gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 min-h-[44px]",
                 "hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                 pathname === href
                   ? "bg-blue-50 text-blue-700"
@@ -53,17 +53,17 @@ export function Sidebar({ role }: { role: string }) {
               )}
             >
               <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
-              {label}
+              <span className="hidden sm:block">{label}</span>
             </Link>
           ))}
         </nav>
         <div className="px-3 py-4 border-t border-neutral-200">
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            className="flex items-center justify-center sm:justify-start gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 min-h-[44px]"
           >
             <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
-            Sign out
+            <span className="hidden sm:block">Sign out</span>
           </button>
         </div>
       </aside>
