@@ -8,6 +8,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Admin Dashboard",
   description: "Overview of lead routing activity, SLA performance, and rep workload.",
+  alternates: { canonical: "/admin" },
 };
 
 export default async function AdminDashboardPage() {

@@ -17,7 +17,14 @@ export const metadata: Metadata = {
   },
   description:
     "Automatically route inbound leads to sales reps with configurable rules and SLA tracking.",
-  metadataBase: new URL(process.env.NEXTAUTH_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXTAUTH_URL && process.env.NEXTAUTH_URL !== "http://localhost:3000"
+      ? process.env.NEXTAUTH_URL
+      : "https://leadrouter.vercel.app"
+  ),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     siteName: "LeadRouter",
@@ -49,6 +56,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           {children}
           <Toaster richColors closeButton duration={4000} position="bottom-right" />
+          {/* Polite live region so screen readers announce toast messages */}
+          <div aria-live="polite" aria-atomic="true" className="sr-only" id="toast-announcer" />
         </Providers>
       </body>
     </html>

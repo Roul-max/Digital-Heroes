@@ -23,6 +23,7 @@ const mockLead: Lead = {
   firstResponseAt: null,
   createdAt: new Date(),
   updatedAt: new Date(),
+  deletedAt: null,
 };
 
 const mockRep = {

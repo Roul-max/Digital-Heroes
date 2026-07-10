@@ -25,6 +25,15 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+          NEXTAUTH_SECRET: test-secret-at-least-32-characters-long
+          RESEND_API_KEY: re_test
+          EMAIL_FROM: test@test.com
+          NEXTAUTH_URL: http://localhost:3000
+
       - name: Unit tests
         run: npm run test
         env:

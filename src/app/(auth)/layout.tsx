@@ -1,3 +1,15 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sign In",
+  description:
+    "Sign in to LeadRouter, create your account, or reset your password to manage lead routing for your sales team.",
+  openGraph: {
+    title: "LeadRouter — Sign In",
+    description: "Sign in to manage lead routing for your sales team.",
+  },
+};
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4">

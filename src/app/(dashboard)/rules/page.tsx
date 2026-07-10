@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Routing Rules",
   description: "Configure how inbound leads are routed to sales reps.",
+  alternates: { canonical: "/rules" },
 };
 
 export default async function RulesPage() {

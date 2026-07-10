@@ -2,12 +2,14 @@
 
 > Automatically round-robin inbound leads to sales reps by configurable rules, with real-time SLA tracking on response time.
 
-[![CI](https://github.com/your-org/leadrouter/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/leadrouter/actions/workflows/ci.yml)
+[![CI](https://github.com/rohit/leadrouter/actions/workflows/ci.yml/badge.svg)](https://github.com/rohit/leadrouter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ![LeadRouter Dashboard](docs/screenshots/dashboard.png)
 
 **[Live Demo →](https://leadrouter.vercel.app)**
+
+Demo credentials — Admin: `demo@demo.com` / Rep: `rep1@demo.com` · password: `demo1234`
 
 ---
 
@@ -22,7 +24,7 @@
 - **CSV export** — full leads table, rate-limited, streamed
 - **Email verification + password reset** — single-use hashed tokens, 30-min TTL
 - **RBAC** — ADMIN and REP roles, enforced server-side on every route and mutation
-- **Accessible UI** — WCAG 2.1 AA, keyboard navigable, focus rings, semantic HTML
+- **Accessible UI** — WCAG 2.1 AA, keyboard navigable (`/` search, `j/k` rows, `⌘K` palette), focus rings, semantic HTML
 
 ## Tech Stack
 
@@ -40,7 +42,7 @@
 ## Quick Start
 
 ```bash
-git clone https://github.com/your-org/leadrouter
+git clone https://github.com/rohit/leadrouter
 cd leadrouter
 cp .env.example .env.local   # fill in your values (see table below)
 npm install
@@ -59,6 +61,8 @@ npm run dev                   # http://localhost:3000
 | `RESEND_API_KEY` | ✅ | API key from [resend.com](https://resend.com) |
 | `EMAIL_FROM` | — | Sender address (default: `noreply@leadrouter.app`) |
 | `SLA_HOURS` | — | Hours before a lead is SLA-breached (default: `2`) |
+| `UPSTASH_REDIS_REST_URL` | — | Upstash Redis URL for multi-instance rate limiting |
+| `UPSTASH_REDIS_REST_TOKEN` | — | Upstash Redis token |
 
 ## Architecture
 
@@ -79,15 +83,33 @@ npm run typecheck      # TypeScript strict check
 npm run lint           # ESLint
 ```
 
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `⌘K` / `Ctrl+K` | Open command palette |
+| `/` | Focus search input |
+| `j` / `k` | Navigate table rows |
+| `Esc` | Close palette / modal |
+
 ## Roadmap
 
 - [ ] Webhook intake endpoint (POST `/api/leads/ingest`) for CRM integrations
 - [ ] Configurable SLA per routing rule (not just global)
 - [ ] Bulk reassignment with select-all-across-pages
-- [ ] Cmd+K command palette
 - [ ] Playwright e2e tests
 - [ ] Upstash Redis rate limiter for multi-instance deploys
 - [ ] OAuth providers (Google, GitHub) via Auth.js
+
+## Screenshots
+
+![Admin Dashboard](docs/screenshots/dashboard.png)
+![Leads Table](docs/screenshots/leads.png)
+![Routing Rules](docs/screenshots/rules.png)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, branch strategy, and commit conventions.
 
 ## Demo Credentials
 
@@ -99,3 +121,7 @@ npm run lint           # ESLint
 ## License
 
 [MIT](LICENSE)
+
+---
+
+Built as part of the [Digital Heroes](https://digitalheroes.dev) Full Stack Developer Trial.

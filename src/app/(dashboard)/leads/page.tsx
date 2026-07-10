@@ -1,10 +1,14 @@
 import { getLeads } from "@/server/actions/leads";
+import { LeadsTable } from "@/components/features/leads-table";
 import Link from "next/link";
+import { Suspense } from "react";
+import { TableSkeleton, Skeleton } from "@/components/ui/skeleton";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Leads",
   description: "Browse, search, and manage all inbound leads.",
+  alternates: { canonical: "/leads" },
 };
 
 type SearchParams = Promise<{
@@ -16,8 +20,7 @@ type SearchParams = Promise<{
   sortDir?: "asc" | "desc";
 }>;
 
-export default async function LeadsPage({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams;
+async function LeadsContent({ params }: { params: Awaited<SearchParams> }) {
   const { data: leads, nextCursor } = await getLeads({
     search: params.search,
     status: params.status,
@@ -27,6 +30,19 @@ export default async function LeadsPage({ searchParams }: { searchParams: Search
     sortDir: params.sortDir,
   });
 
+  const hasFilters = !!(params.search || params.status || params.region);
+
+  return (
+    <LeadsTable
+      leads={leads ?? []}
+      nextCursor={nextCursor}
+      hasFilters={hasFilters}
+    />
+  );
+}
+
+export default async function LeadsPage({ searchParams }: { searchParams: SearchParams }) {
+  const params = await searchParams;
   const hasFilters = !!(params.search || params.status || params.region);
 
   return (
@@ -41,14 +57,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Search
         </Link>
       </div>
 
-      {/* Filters */}
-      <form className="flex gap-3 flex-wrap">
-        <input
-          name="search"
-          defaultValue={params.search}
-          placeholder="Search name, email, company…"
-          className="px-3 py-2 rounded-md border border-neutral-300 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 w-64"
-        />
+      {/* Status + region filters — URL-driven so state is shareable */}
+      <form className="flex gap-3 flex-wrap items-center">
         <select
           name="status"
           defaultValue={params.status ?? ""}
@@ -56,80 +66,43 @@ export default async function LeadsPage({ searchParams }: { searchParams: Search
         >
           <option value="">All statuses</option>
           {["NEW", "CONTACTED", "QUALIFIED", "WON", "LOST"].map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s}>
+              {s}
+            </option>
           ))}
         </select>
-        <button type="submit" className="px-4 py-2 bg-neutral-900 text-white text-sm rounded-lg hover:bg-neutral-700 transition-colors duration-150">
+        <input
+          name="region"
+          defaultValue={params.region ?? ""}
+          placeholder="Filter by region…"
+          className="px-3 py-2 rounded-md border border-neutral-300 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 w-44"
+        />
+        <button
+          type="submit"
+          className="px-4 py-2 bg-neutral-900 text-white text-sm rounded-lg hover:bg-neutral-700 transition-colors duration-150"
+        >
           Filter
         </button>
         {hasFilters && (
-          <Link href="/leads" className="px-4 py-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
+          <Link
+            href="/leads"
+            className="px-4 py-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+          >
             Clear filters
           </Link>
         )}
       </form>
 
-      {/* Table */}
-      {!leads || leads.length === 0 ? (
-        <div className="bg-white rounded-xl border border-neutral-200 p-12 text-center">
-          {hasFilters ? (
-            <>
-              <p className="text-neutral-500 text-sm mb-3">No leads match your filters.</p>
-              <Link href="/leads" className="text-blue-600 hover:underline text-sm">Clear filters</Link>
-            </>
-          ) : (
-            <>
-              <p className="text-neutral-500 text-sm mb-3">No leads yet.</p>
-              <Link href="/leads/new" className="text-blue-600 hover:underline text-sm">Create your first lead →</Link>
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-neutral-50 border-b border-neutral-200">
-              <tr className="text-left text-neutral-500">
-                {["Name", "Company", "Region", "Deal Size", "Status", "Assigned To"].map((h) => (
-                  <th key={h} className="px-4 py-3 font-medium">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100">
-              {leads.map((lead) => (
-                <tr key={lead.id} className="hover:bg-neutral-50 transition-colors duration-150">
-                  <td className="px-4 py-3">
-                    <Link href={`/leads/${lead.id}`} className="text-blue-600 hover:underline font-medium">
-                      {lead.name}
-                    </Link>
-                    <p className="text-neutral-400 text-xs">{lead.email}</p>
-                  </td>
-                  <td className="px-4 py-3 text-neutral-600">{lead.company ?? "—"}</td>
-                  <td className="px-4 py-3 text-neutral-600">{lead.region}</td>
-                  <td className="px-4 py-3 font-mono text-neutral-600">${lead.dealSize.toLocaleString()}</td>
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700">
-                      {lead.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-neutral-500">
-                    {(lead as { assignedTo?: { email: string } | null }).assignedTo?.email ?? "Unassigned"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {nextCursor && (
-            <div className="px-4 py-3 border-t border-neutral-100 text-center">
-              <Link
-                href={`/leads?cursor=${nextCursor}${params.search ? `&search=${params.search}` : ""}${params.status ? `&status=${params.status}` : ""}`}
-                className="text-sm text-blue-600 hover:underline"
-              >
-                Load more
-              </Link>
-            </div>
-          )}
-        </div>
-      )}
+      <Suspense
+        fallback={
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-48" />
+            <TableSkeleton rows={8} cols={7} />
+          </div>
+        }
+      >
+        <LeadsContent params={params} />
+      </Suspense>
     </div>
   );
 }

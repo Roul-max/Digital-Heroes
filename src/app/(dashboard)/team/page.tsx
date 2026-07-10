@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Team",
   description: "Manage sales reps and their lead capacity.",
+  alternates: { canonical: "/team" },
 };
 
 export default async function TeamPage() {

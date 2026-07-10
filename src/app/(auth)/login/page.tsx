@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import { checkLoginRateLimit } from "@/server/actions/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,9 +15,19 @@ export default function LoginPage() {
     e.preventDefault();
     setPending(true);
     const fd = new FormData(e.currentTarget);
+    const email = fd.get("email") as string;
+
+    // Server-side rate limit check (IP + email), ~5 attempts / 15 min
+    const { allowed, retryAfter } = await checkLoginRateLimit(email);
+    if (!allowed) {
+      setPending(false);
+      const minutes = retryAfter ? Math.ceil(retryAfter / 60) : 15;
+      toast.error(`Too many attempts. Try again in ${minutes} minute${minutes !== 1 ? "s" : ""}.`);
+      return;
+    }
 
     const result = await signIn("credentials", {
-      email: fd.get("email"),
+      email,
       password: fd.get("password"),
       redirect: false,
     });
@@ -28,7 +39,10 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/admin");
+    // Fetch the session to determine role for redirect
+    const { getSession } = await import("next-auth/react");
+    const session = await getSession();
+    router.push(session?.user?.role === "REP" ? "/rep" : "/admin");
     router.refresh();
   }
 

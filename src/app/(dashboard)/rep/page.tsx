@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "My Leads",
   description: "Your assigned leads with SLA response tracking.",
+  alternates: { canonical: "/rep" },
 };
 
 export default async function RepDashboardPage() {

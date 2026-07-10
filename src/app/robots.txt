@@ -1,5 +1,14 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /admin
+Disallow: /leads
+Disallow: /rep
+Disallow: /rules
+Disallow: /team
+
+# Block Vercel preview deployments
+User-agent: *
+Disallow: /*.vercel.app$
 
 Sitemap: https://leadrouter.vercel.app/sitemap.xml

@@ -9,6 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title: lead ? `${lead.name} — Lead Detail` : "Lead Not Found",
     description: lead ? `Manage lead for ${lead.name} at ${lead.company ?? "unknown company"}.` : undefined,
+    alternates: lead ? { canonical: `/leads/${id}` } : undefined,
   };
 }
 
@@ -17,8 +18,21 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   const lead = await getLead(id);
   if (!lead) notFound();
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Leads", item: "/leads" },
+      { "@type": "ListItem", position: 2, name: lead.name, item: `/leads/${id}` },
+    ],
+  };
+
   return (
     <div className="max-w-3xl space-y-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <div>
         <h1 className="text-2xl font-semibold text-neutral-900">{lead.name}</h1>
         <p className="text-neutral-500 text-sm mt-1">{lead.email} · {lead.company ?? "No company"}</p>

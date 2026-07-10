@@ -2,6 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail, sendPasswordResetEmail } from "@/lib/email";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -12,6 +13,12 @@ const RegisterSchema = z.object({
   password: z.string().min(8),
   name: z.string().min(1),
 });
+
+export async function checkLoginRateLimit(email: string): Promise<{ allowed: boolean; retryAfter?: number }> {
+  const headersList = await headers();
+  const ip = headersList.get("x-forwarded-for") ?? "unknown";
+  return checkRateLimit(`login:${ip}:${email}`);
+}
 
 export async function registerUser(formData: FormData) {
   const parsed = RegisterSchema.safeParse(Object.fromEntries(formData));
@@ -68,7 +75,7 @@ export async function verifyEmail(token: string) {
 
 export async function requestPasswordReset(email: string, ip: string) {
   const rateLimitKey = `reset:${ip}:${email}`;
-  const { allowed, retryAfter } = checkRateLimit(rateLimitKey);
+  const { allowed, retryAfter } = await checkRateLimit(rateLimitKey);
   if (!allowed) return { error: `Too many attempts. Retry in ${retryAfter}s` };
 
   // Always return success to prevent email enumeration

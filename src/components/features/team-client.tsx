@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { updateUserCapacity, softDeleteUser } from "@/server/actions/users";
 import { Trash2, Check } from "lucide-react";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 type User = {
   id: string;
@@ -17,6 +18,7 @@ export function TeamClient({ users: initial }: { users: User[] }) {
   const [users, setUsers] = useState(initial);
   const [editing, setEditing] = useState<Record<string, number>>({});
   const [isPending, startTransition] = useTransition();
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   function handleCapacityChange(id: string, val: number) {
     setEditing((prev) => ({ ...prev, [id]: val }));
@@ -35,13 +37,18 @@ export function TeamClient({ users: initial }: { users: User[] }) {
   }
 
   function handleDelete(id: string) {
-    if (!confirm("Remove this rep? Their active leads will be unassigned.")) return;
+    setConfirmId(id);
+  }
+
+  function executeDelete(id: string) {
     startTransition(async () => {
       await softDeleteUser(id);
       setUsers((prev) => prev.filter((u) => u.id !== id));
       toast.success("Rep removed");
     });
   }
+
+  const confirmUser = users.find((u) => u.id === confirmId);
 
   if (users.length === 0) {
     return (
@@ -52,6 +59,16 @@ export function TeamClient({ users: initial }: { users: User[] }) {
   }
 
   return (
+    <>
+      <ConfirmModal
+        open={!!confirmId}
+        title="Remove rep?"
+        description={`${confirmUser?.name ?? confirmUser?.email ?? "This rep"}'s active leads will be unassigned.`}
+        confirmLabel="Remove"
+        destructive
+        onConfirm={() => { if (confirmId) executeDelete(confirmId); setConfirmId(null); }}
+        onCancel={() => setConfirmId(null)}
+      />
     <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
       <table className="w-full text-sm">
         <thead className="bg-neutral-50 border-b border-neutral-200">
@@ -106,5 +123,6 @@ export function TeamClient({ users: initial }: { users: User[] }) {
         </tbody>
       </table>
     </div>
+    </>
   );
 }

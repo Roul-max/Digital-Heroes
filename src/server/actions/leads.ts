@@ -96,10 +96,28 @@ export async function updateLeadStatus(leadId: string, data: unknown) {
 }
 
 export async function deleteLead(leadId: string) {
-  await requireAdmin();
-  const lead = await prisma.lead.delete({ where: { id: leadId } });
+  const actor = await requireAdmin();
+
+  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+  if (!lead) return { error: { _: ["Lead not found"] } };
+
+  const deleted = await prisma.lead.update({
+    where: { id: leadId },
+    data: { deletedAt: new Date() },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      leadId,
+      actorId: actor.id,
+      action: "DELETED",
+      metadata: { name: lead.name, email: lead.email },
+    },
+  });
+
   revalidatePath("/admin");
-  return { data: lead };
+  revalidatePath("/leads");
+  return { data: deleted };
 }
 
 export async function getLeads(params: {
@@ -117,6 +135,7 @@ export async function getLeads(params: {
   const sortDir = params.sortDir ?? "desc";
 
   const where = {
+    deletedAt: null,
     ...(actor.role === "REP" ? { assignedToId: actor.id } : {}),
     ...(params.status ? { status: params.status as never } : {}),
     ...(params.region ? { region: params.region } : {}),
@@ -149,7 +168,7 @@ export async function getLeads(params: {
 export async function getLead(leadId: string) {
   const actor = await requireAuth();
   const lead = await prisma.lead.findUnique({
-    where: { id: leadId },
+    where: { id: leadId, deletedAt: null },
     include: {
       assignedTo: { select: { id: true, email: true, name: true } },
       auditLogs: {

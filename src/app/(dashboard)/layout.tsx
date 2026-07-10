@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
+import { KeyboardShortcuts } from "@/components/layout/keyboard-shortcuts";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -10,6 +11,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="flex min-h-screen">
       <Sidebar role={session.user.role} />
       <main className="flex-1 p-8 overflow-auto" id="main-content">
+        <KeyboardShortcuts />
         {children}
       </main>
     </div>

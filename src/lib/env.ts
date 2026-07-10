@@ -8,6 +8,9 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().email().default("noreply@leadrouter.app"),
   SLA_HOURS: z.coerce.number().int().min(1).default(2),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  // Upstash Redis — optional; falls back to in-memory rate limiting when absent
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 });
 
 // Throws at startup if env is misconfigured — never silently undefined
