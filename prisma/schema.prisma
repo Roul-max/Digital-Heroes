@@ -1,0 +1,108 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  REP
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  WON
+  LOST
+}
+
+enum DistributionMethod {
+  ROUND_ROBIN
+  DIRECT_ASSIGN
+}
+
+model User {
+  id                      String    @id @default(uuid())
+  email                   String    @unique
+  name                    String?
+  passwordHash            String    @map("password_hash")
+  role                    Role      @default(REP)
+  maxActiveLeads          Int?      @map("max_active_leads")
+  emailVerified           DateTime? @map("email_verified")
+  verificationToken       String?   @map("verification_token")
+  verificationTokenExpiry DateTime? @map("verification_token_expiry")
+  resetToken              String?   @map("reset_token")
+  resetTokenExpiry        DateTime? @map("reset_token_expiry")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
+  deletedAt               DateTime? @map("deleted_at")
+
+  assignedLeads    Lead[]        @relation("AssignedLeads")
+  targetedRules    RoutingRule[] @relation("TargetedUser")
+  auditLogs        AuditLog[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Lead {
+  id               String     @id @default(uuid())
+  email            String     @unique
+  name             String
+  company          String?
+  region           String
+  dealSize         Int        @map("deal_size")
+  productLine      String     @map("product_line")
+  status           LeadStatus @default(NEW)
+  assignedToId     String?    @map("assigned_to_id")
+  routedAt         DateTime?  @map("routed_at")
+  firstResponseAt  DateTime?  @map("first_response_at")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+
+  assignedTo       User?      @relation("AssignedLeads", fields: [assignedToId], references: [id], onDelete: SetNull)
+  auditLogs        AuditLog[]
+
+  @@index([region])
+  @@index([dealSize])
+  @@index([productLine])
+  @@index([status])
+  @@index([assignedToId])
+  @@map("leads")
+}
+
+model RoutingRule {
+  id                 String             @id @default(uuid())
+  name               String
+  criteriaJson       Json               @map("criteria_json")
+  distributionMethod DistributionMethod @map("distribution_method")
+  targetUserId       String?            @map("target_user_id")
+  isActive           Boolean            @default(true) @map("is_active")
+  priority           Int
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  targetUser         User?              @relation("TargetedUser", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  @@map("routing_rules")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  leadId    String   @map("lead_id")
+  actorId   String   @map("actor_id")
+  action    String
+  metadata  Json
+  createdAt DateTime @default(now()) @map("created_at")
+
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  actor     User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([actorId])
+  @@map("audit_logs")
+}

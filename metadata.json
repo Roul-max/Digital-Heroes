@@ -1,0 +1,8 @@
+{
+  "name": "LeadRouter",
+  "description": "A CRM tool that automatically round-robins inbound leads to sales reps by configurable rules, with SLA tracking on response time.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
